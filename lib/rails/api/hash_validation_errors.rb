@@ -5,10 +5,10 @@ module Rails::API::HashValidationErrors
   end
 
   def use_hash_validation_errors(&block)
-    ActiveModel::Errors.disable_translations
+    ActiveModel::Errors.enable_extended_errors
     yield
   ensure
-    ActiveModel::Errors.enable_translations
+    ActiveModel::Errors.disable_extended_errors
   end
 
 end

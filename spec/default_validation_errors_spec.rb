@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'Default validation errors' do
 
   before :each do
-    ActiveModel::Errors.enable_translations
+    ActiveModel::Errors.disable_extended_errors
   end
 
   it 'returns normal translated errors when directly validating a model' do

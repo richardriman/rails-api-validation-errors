@@ -3,29 +3,27 @@
 module ActiveModel
   class Errors
 
-    # Option to specify wether to return hash or translation. Defaults to true
+    # Option to specify wether to return hash or translation. Defaults to translation (false)
     # to keep original behaviour.
-    @@translate_message = true
+    @@extended_errors = false
 
-    def self.disable_translations
-      @@translate_message = false
+    def self.disable_extended_errors
+      @@extended_errors = false
     end
 
-    def self.enable_translations
-      @@translate_message = true
+    def self.enable_extended_errors
+      @@extended_errors = true
     end
 
     # Keep original method
     alias _generate_message generate_message
 
     def generate_message(attribute, type = :invalid, options = {})
-      if @@translate_message
-        _generate_message(attribute, type, options)
-      else
-        type = options.delete(:message) if options[:message].is_a?(Symbol)
+      message = _generate_message(attribute, type, options)
+      return message unless @@extended_errors
 
-        { :message => type, :meta => options }
-      end
+      type = options[:message] if options[:message].is_a?(Symbol)
+      { type: type, message: message, meta: options }
     end
 
   end

@@ -3,88 +3,90 @@ require 'spec_helper'
 describe ActiveModel::Errors do
 
   before :each do
-    ActiveModel::Errors.enable_translations
+    ActiveModel::Errors.disable_extended_errors
   end
 
   after :each do
-    ActiveModel::Errors.enable_translations
+    ActiveModel::Errors.disable_extended_errors
   end
 
-  it { expect(ActiveModel::Errors).to respond_to :enable_translations }
-  it { expect(ActiveModel::Errors).to respond_to :disable_translations }
+  it { expect(ActiveModel::Errors).to respond_to :enable_extended_errors }
+  it { expect(ActiveModel::Errors).to respond_to :disable_extended_errors }
 
-  it 'translates messages per default' do
-    option = ActiveModel::Errors.class_variable_get '@@translate_message'
-    expect(option).to be_true
+  it 'original messages per default' do
+    option = ActiveModel::Errors.class_variable_get('@@extended_errors')
+    expect(option).to be_false
   end
 
-  describe '.enable_translations' do
-    it 'sets message translation option to true' do
-      ActiveModel::Errors.class_variable_set '@@translate_message', false
-      ActiveModel::Errors.enable_translations
-      option = ActiveModel::Errors.class_variable_get '@@translate_message'
+  describe '.enable_extended_translations' do
+    it 'sets errors to extended mode' do
+      ActiveModel::Errors.enable_extended_errors
+      option = ActiveModel::Errors.class_variable_get('@@extended_errors')
       expect(option).to be_true
     end
   end
 
-  describe '.disable_translations' do
-    it 'sets message translation option to false' do
-      ActiveModel::Errors.disable_translations
-      option = ActiveModel::Errors.class_variable_get '@@translate_message'
+  describe '.disable_extended_translations' do
+    it 'sets errors to original mode' do
+      ActiveModel::Errors.disable_extended_errors
+      option = ActiveModel::Errors.class_variable_get('@@extended_errors')
       expect(option).to be_false
     end
   end
 
   describe '#generate_message' do
+
     let(:errors) { ActiveModel::Errors.new({}) }
 
-    context "when translations are turned on" do
+    context "when extended error are turned off" do
       it 'uses the original method' do
-        ActiveModel::Errors.enable_translations
+        ActiveModel::Errors.disable_extended_errors
         stub(errors)._generate_message
 
         errors.generate_message(:attribute)
 
-        expect(errors).to have_received._generate_message(
-          :attribute, :invalid, {}
-        )
+        expect(errors).to have_received._generate_message(:attribute, :invalid, {})
       end
     end
 
-    context "when translations are turned off" do
+    context "when translations are turned on" do
       before :each do
-        ActiveModel::Errors.disable_translations
+        ActiveModel::Errors.enable_extended_errors
       end
 
-      it 'does not use the original method' do
+      it 'uses the original method too' do
         stub(errors)._generate_message
 
         errors.generate_message(:attribute)
 
-        expect(errors).to_not have_received._generate_message(
-          :attribute, :invalid, {}
-        )
+        expect(errors).to have_received._generate_message(:attribute, :invalid, {})
       end
 
-      it 'returns a hash with message and meta keys' do
-        error_hash = errors.generate_message :attribute
+      it 'returns a hash with type, message and meta keys' do
+        stub(errors)._generate_message
+        error_hash = errors.generate_message(:attribute)
 
-        expect(error_hash).to be_instance_of Hash
-        expect(error_hash).to have_key :message
-        expect(error_hash).to have_key :meta
+        expect(error_hash).to be_instance_of(Hash)
+        expect(error_hash).to have_key(:type)
+        expect(error_hash).to have_key(:message)
+        expect(error_hash).to have_key(:meta)
       end
 
-      it 'returns the type as message' do
-        error_hash = errors.generate_message :attribute, :custom_error
+      it 'returns the untranslated message as type' do
+        stub(errors)._generate_message
 
-        expect(error_hash[:message]).to eq :custom_error
+        error_hash = errors.generate_message(:attribute, :custom_error)
+
+        expect(error_hash[:type]).to eq(:custom_error)
       end
 
       it 'returns passed options as meta' do
-        error_hash = errors.generate_message :attribute, :invalid, { :count => 2 }
+        stub(errors)._generate_message
 
-        expect(error_hash[:meta]).to have_key :count
-        expect(error_hash[:meta][:count]).to eq 2
+        error_hash = errors.generate_message(:attribute, :invalid, count: 2)
+
+        expect(error_hash[:meta]).to have_key(:count)
+        expect(error_hash[:meta][:count]).to eq(2)
       end
     end
   end
