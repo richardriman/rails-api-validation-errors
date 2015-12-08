@@ -14,7 +14,7 @@ The easiest way to install `Rails::API::ValidationErrors` is to add it to your
 `Gemfile`:
 
 ```ruby
-gem "rails_api_validation_errors"
+gem "rails_api_validation_errors", github: "richardriman/rails-api-validation-errors"
 ```
 
 Then, install it on the command line:
