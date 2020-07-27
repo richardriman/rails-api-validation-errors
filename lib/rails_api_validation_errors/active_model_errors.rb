@@ -24,7 +24,7 @@ module ActiveModel
       type = options[:message] if options[:message].is_a?(Symbol)
       
       res = { type: type, message: message, meta: options }
-      res.code = options[:code] if options[:code]
+      res[:code] = options[:code] if options[:code]
       res
     end
   end
