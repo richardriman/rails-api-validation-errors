@@ -2,7 +2,6 @@
 # key and options if translation is missing.
 module ActiveModel
   class Errors
-
     # Option to specify wether to return hash or translation. Defaults to translation (false)
     # to keep original behaviour.
     @@extended_errors = false
@@ -23,8 +22,10 @@ module ActiveModel
       return message unless @@extended_errors
 
       type = options[:message] if options[:message].is_a?(Symbol)
-      { type: type, message: message, meta: options }
+      
+      res = { type: type, message: message, meta: options }
+      res.code = options[:code] if options[:code]
+      res
     end
-
   end
 end
