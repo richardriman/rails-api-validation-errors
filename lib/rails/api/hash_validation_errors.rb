@@ -2,7 +2,7 @@
 
 module Rails::API::HashValidationErrors
   def self.included(base)
-    base.send :around_filter, :use_hash_validation_errors
+    base.send(base.respond_to?(:around_action) ? :around_action : :around_filter, :use_hash_validation_errors)
   end
 
   def use_hash_validation_errors
