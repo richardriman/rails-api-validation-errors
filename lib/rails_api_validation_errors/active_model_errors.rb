@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'request_store_rails'
+
 # Monkey patch ActiveModel::Errors class to return a hash containing translation
 # key and options if translation is missing.
 module ActiveModel
